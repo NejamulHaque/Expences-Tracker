@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Expense Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white min-h-screen p-4 flex flex-col">
+
+    <main class="flex-grow">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <header class="flex items-center justify-between">
+          <h1 class="text-3xl font-bold">Expense Tracker</h1>
+        </header>
+
+        <form id="expense-form" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="date" id="date" required class="p-2 rounded bg-gray-100 dark:bg-gray-700" />
+          <select id="category" required class="p-2 rounded bg-gray-100 dark:bg-gray-700">
+            <option value="">Select Category</option>
+            <option value="Food">Food</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Housing">Housing</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="number" id="amount" placeholder="Amount" required class="p-2 rounded bg-gray-100 dark:bg-gray-700" />
+          <textarea id="description" placeholder="Description" required class="p-2 rounded bg-gray-100 dark:bg-gray-700"></textarea>
+          <button type="submit" class="col-span-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Add Expense</button>
+        </form>
+
+        <div class="mb-3">
+          <label for="currency" class="form-label">Currency</label>
+          <select class="form-select p-2 rounded bg-gray-100 dark:bg-gray-700" id="currency">
+              <option value="USD" selected>USD ($)</option>
+              <option value="INR">INR (₹)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <select id="filter-category" class="p-2 rounded bg-gray-100 dark:bg-gray-700">
+            <option value="">All Categories</option>
+            <option value="Food">Food</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Housing">Housing</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="search" id="search-input" placeholder="Search expenses" class="p-2 rounded bg-gray-100 dark:bg-gray-700" />
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button id="sort-date-asc" class="bg-indigo-500 text-white py-1 rounded hover:bg-indigo-600">Sort Date ↑</button>
+          <button id="sort-date-desc" class="bg-indigo-500 text-white py-1 rounded hover:bg-indigo-600">Sort Date ↓</button>
+          <button id="sort-amount-asc" class="bg-green-500 text-white py-1 rounded hover:bg-green-600">Sort Amount ↑</button>
+          <button id="sort-amount-desc" class="bg-green-500 text-white py-1 rounded hover:bg-green-600">Sort Amount ↓</button>
+        </div>
+
+        <div class="flex justify-between gap-4">
+          <button id="delete-all" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete All</button>
+          <button id="export-csv" class="bg-yellow-500 text-black px-4 py-2 rounded hover:bg-yellow-600">Export CSV</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-200 dark:bg-gray-700">
+                <th class="p-2">Date</th>
+                <th class="p-2">Category</th>
+                <th class="p-2">Amount</th>
+                <th class="p-2">Description</th>
+                <th class="p-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expense-table-body" class="bg-white dark:bg-gray-800"></tbody>
+          </table>
+        </div>
+
+        <p id="total-expense" class="text-lg font-semibold"></p>
+        <canvas id="expense-chart" class="bg-white dark:bg-gray-800 rounded-lg shadow p-4"></canvas>
+      </div>
+    </main>
+
+    <footer class="text-center text-sm text-gray-500 dark:text-gray-400 mt-10 pt-4 border-t border-gray-300 dark:border-gray-700">
+      <ul>
+        <li>
+          <a href="https://haque-and-sons.vercel.app/" target="_blank" rel="noopener noreferrer" class="hover:underline">
+            Powered By Haque And Sons
+          </a>
+        </li>
+      </ul>
+    </footer>
+
+    <script>
+      let expenses = [];
+      let currentEditIndex = null;
+      let selectedCurrency = 'USD';
+
+      const form = document.getElementById("expense-form");
+      const tableBody = document.getElementById("expense-table-body");
+      const totalExpenseEl = document.getElementById("total-expense");
+      const chartCtx = document.getElementById("expense-chart");
+      const themeToggle = document.getElementById("theme-toggle");
+      const currencySelector = document.getElementById("currency");
+
+      let chart;
+
+      function formatCurrency(amount) {
+        return selectedCurrency === 'INR'
+          ? `₹${amount.toFixed(2)}`
+          : `$${amount.toFixed(2)}`;
+      }
+
+      function updateChart() {
+        const categoryMap = {};
+        expenses.forEach((e) => {
+          categoryMap[e.category] = (categoryMap[e.category] || 0) + e.amount;
+        });
+
+        const labels = Object.keys(categoryMap);
+        const data = Object.values(categoryMap);
+
+        if (chart) chart.destroy();
+        chart = new Chart(chartCtx, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Expenses",
+                data,
+                backgroundColor: "rgba(59, 130, 246, 0.5)",
+                borderColor: "rgba(59, 130, 246, 1)",
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+      }
+
+      function updateTable(data = expenses) {
+        tableBody.innerHTML = "";
+        let total = 0;
+        data.forEach((e, i) => {
+          total += e.amount;
+          tableBody.innerHTML += `
+            <tr>
+              <td class="p-2">${e.date}</td>
+              <td class="p-2">${e.category}</td>
+              <td class="p-2">${formatCurrency(e.amount)}</td>
+              <td class="p-2">${e.description}</td>
+              <td class="p-2">
+                <button class="text-blue-500" onclick="editExpense(${i})">Edit</button>
+                <button class="text-red-500" onclick="deleteExpense(${i})">Delete</button>
+              </td>
+            </tr>`;
+        });
+        totalExpenseEl.textContent = `Total Expense: ${formatCurrency(total)}`;
+        updateChart();
+      }
+
+      function editExpense(i) {
+        const e = expenses[i];
+        document.getElementById("date").value = e.date;
+        document.getElementById("category").value = e.category;
+        document.getElementById("amount").value = e.amount;
+        document.getElementById("description").value = e.description;
+        currentEditIndex = i;
+      }
+
+      function deleteExpense(i) {
+        expenses.splice(i, 1);
+        updateTable();
+      }
+
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const date = document.getElementById("date").value;
+        const category = document.getElementById("category").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+        const description = document.getElementById("description").value;
+
+        const data = { date, category, amount, description };
+
+        if (currentEditIndex !== null) {
+          expenses[currentEditIndex] = data;
+          currentEditIndex = null;
+        } else {
+          expenses.push(data);
+        }
+        form.reset();
+        updateTable();
+      };
+
+      document.getElementById("filter-category").onchange = () => {
+        const cat = document.getElementById("filter-category").value;
+        if (!cat) return updateTable();
+        const filtered = expenses.filter((e) => e.category === cat);
+        updateTable(filtered);
+      };
+
+      document.getElementById("search-input").oninput = () => {
+        const q = document.getElementById("search-input").value.toLowerCase();
+        const filtered = expenses.filter(
+          (e) => e.description.toLowerCase().includes(q) || e.category.toLowerCase().includes(q)
+        );
+        updateTable(filtered);
+      };
+
+      document.getElementById("sort-date-asc").onclick = () => {
+        expenses.sort((a, b) => new Date(a.date) - new Date(b.date));
+        updateTable();
+      };
+
+      document.getElementById("sort-date-desc").onclick = () => {
+        expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        updateTable();
+      };
+
+      document.getElementById("sort-amount-asc").onclick = () => {
+        expenses.sort((a, b) => a.amount - b.amount);
+        updateTable();
+      };
+
+      document.getElementById("sort-amount-desc").onclick = () => {
+        expenses.sort((a, b) => b.amount - a.amount);
+        updateTable();
+      };
+
+      document.getElementById("delete-all").onclick = () => {
+        expenses = [];
+        updateTable();
+      };
+
+      document.getElementById("export-csv").onclick = () => {
+        const csv = expenses.map(e => `${e.date},${e.category},${e.amount},${e.description}`).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "expenses.csv";
+        link.click();
+      };
+
+      currencySelector.onchange = (e) => {
+        selectedCurrency = e.target.value;
+        updateTable();
+      };
+    </script>
+  </body>
+</html>
