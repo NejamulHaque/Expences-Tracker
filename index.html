@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Professional Expense Tracker | Haque & Sons</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>@import url('style.css');</style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen p-4 flex flex-col">
+    <main class="flex-grow">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <!-- Header with theme toggle -->
+            <header class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-wallet text-blue-600 text-2xl"></i>
+                    <h1 class="text-2xl md:text-3xl font-bold">Expense Tracker</h1>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Total Expenses</p>
+                            <p id="total-expense-amount" class="text-2xl font-bold">$0.00</p>
+                        </div>
+                        <i class="fas fa-chart-line text-blue-500 text-xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">This Month</p>
+                            <p id="monthly-expense" class="text-2xl font-bold">$0.00</p>
+                        </div>
+                        <i class="fas fa-calendar-alt text-green-500 text-xl"></i>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm">Top Category</p>
+                            <p id="top-category" class="text-2xl font-bold">-</p>
+                        </div>
+                        <i class="fas fa-tags text-purple-500 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 flex items-center">
+                    <i class="fas fa-plus-circle mr-2 text-blue-500"></i>
+                    Add New Expense
+                </h2>
+                <form id="expense-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="date" class="block text-sm font-medium mb-1">Date</label>
+                        <input type="date" id="date" required 
+                               class="w-full p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 smooth-transition" />
+                    </div>
+                    <div>
+                        <label for="category" class="block text-sm font-medium mb-1">Category</label>
+                        <select id="category" required 
+                                class="w-full p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 smooth-transition">
+                            <option value="">Select Category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Education">Education</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="amount" class="block text-sm font-medium mb-1">Amount</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500 dark:text-gray-400 currency-symbol">$</span>
+                            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required 
+                                   class="w-full pl-8 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 smooth-transition" />
+                        </div>
+                    </div>
+                    <div>
+                        <label for="description" class="block text-sm font-medium mb-1">Description</label>
+                        <textarea id="description" placeholder="Add notes..." 
+                                  class="w-full p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 smooth-transition"></textarea>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end space-x-3">
+                        <button type="button" id="cancel-edit" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 smooth-transition hidden">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submit-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 smooth-transition flex items-center">
+                            <i class="fas fa-save mr-2"></i> Save Expense
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-filter text-blue-500"></i>
+                        <h2 class="text-xl font-semibold">Expense Controls</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="export-csv" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 smooth-transition flex items-center justify-center">
+                            <i class="fas fa-file-export mr-2"></i> Export
+                        </button>
+                        <button id="delete-all" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 smooth-transition flex items-center justify-center">
+                            <i class="fas fa-trash-alt mr-2"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label for="currency" class="block text-sm font-medium mb-1">Currency</label>
+                        <select id="currency" class="w-full p-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 smooth-transition">
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="INR">INR (₹)</option>
+                            <option value="JPY">JPY (¥)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="filter-category" class="block text-sm font-medium mb-1">Filter by Category</label>
+                        <select id="filter-category" class="w-full p-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 smooth-transition">
+                            <option value="">All Categories</option>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Education">Education</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="search-input" class="block text-sm font-medium mb-1">Search Expenses</label>
+                        <div class="relative">
+                            <input type="search" id="search-input" placeholder="Search..." 
+                                   class="w-full pl-10 p-2 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 smooth-transition" />
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-500 dark:text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+                    <button id="sort-date-asc" class="px-3 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 smooth-transition flex items-center justify-center">
+                        <i class="fas fa-sort-amount-up-alt mr-2"></i> Date ↑
+                    </button>
+                    <button id="sort-date-desc" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 smooth-transition flex items-center justify-center">
+                        <i class="fas fa-sort-amount-down mr-2"></i> Date ↓
+                    </button>
+                    <button id="sort-amount-asc" class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 smooth-transition flex items-center justify-center">
+                        <i class="fas fa-sort-numeric-up mr-2"></i> Amount ↑
+                    </button>
+                    <button id="sort-amount-desc" class="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 smooth-transition flex items-center justify-center">
+                        <i class="fas fa-sort-numeric-down-alt mr-2"></i> Amount ↓
+                    </button>
+                </div>
+            </div>
+
+            <!-- Expenses Table -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg overflow-x-auto">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold flex items-center">
+                        <i class="fas fa-list-ul mr-2 text-blue-500"></i>
+                        Expense Records
+                    </h2>
+                    <p id="records-count" class="text-sm text-gray-500 dark:text-gray-400">0 records</p>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-100 dark:bg-gray-700">
+                            <tr>
+                                <th class="p-3 font-medium">Date</th>
+                                <th class="p-3 font-medium">Category</th>
+                                <th class="p-3 font-medium">Amount</th>
+                                <th class="p-3 font-medium">Description</th>
+                                <th class="p-3 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expense-table-body" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                    </table>
+                </div>
+                
+                <div id="empty-state" class="text-center py-10">
+                    <i class="fas fa-wallet text-4xl text-gray-400 mb-3"></i>
+                    <h3 class="text-lg font-medium text-gray-500">No expenses recorded yet</h3>
+                    <p class="text-gray-400">Add your first expense to get started</p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-chart-pie mr-2 text-blue-500"></i>
+                        Expense Distribution
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="expense-chart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 flex items-center">
+                        <i class="fas fa-chart-line mr-2 text-blue-500"></i>
+                        Monthly Trend
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="monthly-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center text-sm text-gray-500 dark:text-gray-400 mt-10 pt-4 border-t border-gray-200 dark:border-gray-800">
+        <div class="flex items-center justify-center space-x-4 mb-2">
+            <a href="https://www.instagram.com/neja_mul_" class="hover:text-blue-500 smooth-transition"><i class="fab fa-instagram"></i></a>
+            <a href="https://x.com/Nejamul_Haque_" class="hover:text-blue-400 smooth-transition"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.linkedin.com/in/nejamulhaque/" class="hover:text-red-500 smooth-transition"><i class="fab fa-linkedin"></i></a>
+            <a href="https://github.com/NejamulHaque" class="hover:text-gray-700 dark:hover:text-white smooth-transition"><i class="fab fa-github"></i></a>
+        </div>
+        <p>© <span id="current-year"></span> Haque & Sons. All rights reserved.</p>
+        <p class="mt-1">v1.0.0</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
