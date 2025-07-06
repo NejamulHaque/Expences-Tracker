@@ -1,75 +1,81 @@
-Expense Tracker
 
-Overview
+# 💸 Expense Tracker Web App
 
-The Expense Tracker is a simple web-based application that allows users to record and manage their expenses. It features filtering, sorting, search, editing, and deletion of expense records. Additionally, users can visualize their expenses through a chart and export their data as a CSV file.
+Track your daily income and expenses effortlessly with our simple and intuitive Expense Tracker. Perfect for students, freelancers, or anyone who wants to take control of their finances — without complex spreadsheets.
 
-Features
+---
 
-Add new expenses with date, category, amount, and description.
+## 🚀 Features
 
-Edit existing expenses.
+- 📥 Add income & expenses
+- 📊 Visual summary of balance, income & spending
+- 📅 Filter transactions by date or category
+- 🗂️ Persistent storage (localStorage or backend-ready)
+- 💡 Responsive, clean UI (mobile + desktop friendly)
 
-Delete individual expenses or clear all expenses.
+---
 
-Filter expenses by category.
+## 📷 Screenshots
 
-Search expenses using keywords.
+![Dashboard Screenshot](./screenshots/dashboard.png)
+![Add Transaction Form](./screenshots/add-form.png)
 
-Sort expenses by date and amount (ascending or descending).
+---
 
-Export expenses as a CSV file.
+## 🛠️ Tech Stack
 
-Visualize expenses using a bar chart.
+- **Frontend**: HTML, CSS (Tailwind/Bootstrap), JavaScript
+- **Backend (optional)**: Node.js + Express + MongoDB
+- **Authentication (optional)**: JWT or Firebase Auth
 
-Technologies Used
+---
 
-HTML5
+## 📦 Installation
 
-CSS3 (Bootstrap 5.1.3)
+### 🧱 Local Setup
 
-JavaScript (Vanilla JS)
+```bash
+# 1. Clone the repository
+git clone https://github.com/yourusername/expense-tracker.git
 
-Chart.js (for visualizing expenses)
+# 2. Navigate to the project folder
+cd expense-tracker
 
-Setup Instructions
+# 3. Open in your browser
+open index.html
+```
 
-Clone or download the project files.
+### 🌐 Backend (optional)
 
-Open index.html in a web browser.
+```bash
+# Install dependencies
+npm install
 
-Start adding, managing, and visualizing your expenses.
+# Run server
+node server.js
+```
 
-Usage
+---
 
-Fill out the expense form and click "Add Expense" to add a new record.
+## 🧪 Coming Soon
 
-Use the filter dropdown to filter by category.
+- 📈 Export PDF reports
+- 🔒 User login / personal dashboards
+- ☁️ Cloud sync with database
+- 🪙 Currency toggle & dark mode
 
-Use the search bar to find expenses by date, category, or description.
+---
 
-Click on the sort buttons to organize expenses by date or amount.
+## 🙋‍♂️ Author
 
-Click "Edit" to modify an expense.
+Made with 💻 by **Nejamul Haque**  
+🔗 [Portfolio Website](https://portfolio-ai-theta.vercel.app/)  
+🐦 [Twitter](https://twitter.com/Nejamul_Haque_)  
+📧 Email: nejamulhaque.05@gmail.com
 
-Click "Delete" to remove an expense.
+---
 
-Click "Delete All Expenses" to clear all records.
+## 📄 License
 
-Click "Export to CSV" to download your expenses as a CSV file.
-
-View expenses in a bar chart for a visual breakdown.
-
-Dependencies
-
-Bootstrap 5.1.3
-
-Chart.js
-
-Live Demo
-
-Built on Haque and Sons
-
-License
-
-This project is open-source and available for modification and distribution.
+This project is licensed under the **MIT License**.  
+Feel free to fork, modify, and improve.
